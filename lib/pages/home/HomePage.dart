@@ -17,7 +17,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   void add(String nomeTarefa) {
-    if (nomeTarefa == "") return;
+    //if (nomeTarefa == "") return;
 
     setState(() {
       widget.items.add(
@@ -58,15 +58,35 @@ class _HomePageState extends State<HomePage> {
     await prefs.setString('data', jsonEncode(widget.items));
   }
 
+  Widget FormUI() {
+    return new Column(
+      children: <Widget>[
+        new TextFormField(
+          decoration: new InputDecoration(hintText: 'Nome da Atividade'),
+          maxLength: 25,
+          validator: (String value) {
+            if (value.length == 0) {
+              return "Insira o nome da atividade";
+            } else {
+              return null;
+            }
+          },
+        )
+      ],
+    );
+  }
+
   showDialogAdd(BuildContext context) {
     var newTaskController = TextEditingController();
-
+    final GlobalKey<FormState> _key = GlobalKey<FormState>();
     // configura o button
     Widget readyButton = FlatButton(
       child: Text("Pronto!"),
       onPressed: () {
-        add(newTaskController.text);
-        Navigator.pop(context);
+        if (_key.currentState.validate()) {
+          add(newTaskController.text);
+          Navigator.pop(context);
+        }
       },
     );
 
@@ -77,16 +97,22 @@ class _HomePageState extends State<HomePage> {
       },
     );
 
-    final txtNewTask = TextField(
-      controller: newTaskController,
-      decoration: InputDecoration(
-        hintText: "Digite...",
-        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(
-            //borderRadius: BorderRadius.circular(20.0),
-            ),
-      ),
-    );
+    // final txtNewTask = TextFormField(
+    //   controller: newTaskController,
+    //   key: _key,
+    //   decoration: new InputDecoration(hintText: 'Nome da atividade'),
+    //   maxLength: 25,
+    //   keyboardType: TextInputType.text,
+    //   validator: (String value) {
+    //     if (value.length == 0) {
+    //       print("saddsadsadsadsadsadasds");
+    //       return "Insira o nome da atividade";
+    //     } else {
+    //       print("eeeeeeeeeeeeeeeeeeeeeeeeeee");
+    //       return null;
+    //     }
+    //   },
+    // );
 
     // configura o  AlertDialog
     AlertDialog alerta = AlertDialog(
@@ -95,7 +121,15 @@ class _HomePageState extends State<HomePage> {
       //   controller: newTaskCtrl,
       //   keyboardType: TextInputType.text,
       // ),
-      content: txtNewTask,
+      content: new SingleChildScrollView(
+        child: new Container(
+          margin: new EdgeInsets.all(15.0),
+          child: new Form(
+            key: _key,
+            child: FormUI(),
+          ),
+        ),
+      ),
       actions: [
         cancelButton,
         readyButton,
